@@ -31,6 +31,8 @@ Dynamixel::Dynamixel() : Node("dynamixel_h54") {
   const auto ids = this->get_parameter("ids").as_integer_array();
   for (const auto& id : ids) {
     packetHandler->write1ByteTxOnly(portHandler, id, ADDR_TOURQUE_ENABLE, 1);
+    const auto result = packetHandler->ping(portHandler, id);
+    RCLCPP_INFO_STREAM(logger, "id: " << id << "  ping result: " << result);
 
     Motor motor;
     motor.portHandler = portHandler;
