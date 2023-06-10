@@ -31,46 +31,26 @@ Dynamixel::Dynamixel() : Node("dynamixel_h54") {
   const auto ids = this->get_parameter("ids").as_integer_array();
   for (const auto& id : ids) {
  
-        dxl_comm_result = packetHandler->write1ByteTxRx(
-        portHandler,
-        id,
-        ADDR_TOURQUE_ENABLE,
-        0,
-        &dxl_error
-        );
-        if (dxl_comm_result != COMM_SUCCESS) {
-    RCLCPP_ERROR(rclcpp::get_logger("tourque"), "Failed .");
-  } else {
-    RCLCPP_INFO(rclcpp::get_logger("tourque"), "Succeeded .");
-  }
+    dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, id, ADDR_TOURQUE_ENABLE, 0, &dxl_error);
+    if (dxl_comm_result != COMM_SUCCESS) {
+      RCLCPP_ERROR(rclcpp::get_logger("tourque"), "Failed to set tourque disable.");
+    } else {
+      RCLCPP_INFO(rclcpp::get_logger("tourque"), "Succeeded to set tourque disable.");
+    }
   
-        dxl_comm_result = packetHandler->write1ByteTxRx(
-        portHandler,
-        id,
-        ADDR_OPERATING_MODE,
-        1,
-        &dxl_error
-        );
-if (dxl_comm_result != COMM_SUCCESS) {
-    RCLCPP_ERROR(rclcpp::get_logger("read_write_node"), "Failed to set Velocity Control Mode.");
-  } else {
-    RCLCPP_INFO(rclcpp::get_logger("read_write_node"), "Succeeded to set Velocity Control Mode.");
-  }
+    dxl_comm_result = packetHandler->write1ByteTxRx( portHandler, id, ADDR_OPERATING_MODE, 1, &dxl_error);
+    if (dxl_comm_result != COMM_SUCCESS) {
+      RCLCPP_ERROR(rclcpp::get_logger("read_write_node"), "Failed to set Velocity Control Mode.");
+    } else {
+      RCLCPP_INFO(rclcpp::get_logger("read_write_node"), "Succeeded to set Velocity Control Mode.");
+    }
 
-  dxl_comm_result = packetHandler->write1ByteTxRx(
-        portHandler,
-        id,
-        ADDR_TOURQUE_ENABLE,
-        1,
-        &dxl_error
-        );
-        if (dxl_comm_result != COMM_SUCCESS) {
-    RCLCPP_ERROR(rclcpp::get_logger("tourque"), "Failed to set tourque.");
-  } else {
-    RCLCPP_INFO(rclcpp::get_logger("tourque"), "Succeeded to set tourque.");
-  }   // packetHandler->write1ByteTxOnly(portHandler, id, ADDR_TOURQUE_ENABLE, 1);
-    // const auto result = packetHandler->ping(portHandler, id);
-    // RCLCPP_INFO_STREAM(logger, "id: " << id << "  ping result: " << result);
+    dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, id, ADDR_TOURQUE_ENABLE, 1, &dxl_error);
+    if (dxl_comm_result != COMM_SUCCESS) {
+      RCLCPP_ERROR(rclcpp::get_logger("tourque"), "Failed to set tourque enable.");
+    } else {
+      RCLCPP_INFO(rclcpp::get_logger("tourque"), "Succeeded to set tourque enable.");
+    }
 
     Motor motor;
     motor.portHandler = portHandler;
