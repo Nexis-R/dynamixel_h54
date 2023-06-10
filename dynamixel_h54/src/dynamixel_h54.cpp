@@ -30,9 +30,27 @@ Dynamixel::Dynamixel() : Node("dynamixel_h54") {
 
   const auto ids = this->get_parameter("ids").as_integer_array();
   for (const auto& id : ids) {
-    packetHandler->write1ByteTxOnly(portHandler, id, ADDR_TOURQUE_ENABLE, 1);
-    const auto result = packetHandler->ping(portHandler, id);
-    RCLCPP_INFO_STREAM(logger, "id: " << id << "  ping result: " << result);
+ 
+    dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, id, ADDR_TOURQUE_ENABLE, 0, &dxl_error);
+    if (dxl_comm_result != COMM_SUCCESS) {
+      RCLCPP_ERROR(rclcpp::get_logger("tourque"), "Failed to set tourque disable.");
+    } else {
+      RCLCPP_INFO(rclcpp::get_logger("tourque"), "Succeeded to set tourque disable.");
+    }
+  
+    dxl_comm_result = packetHandler->write1ByteTxRx( portHandler, id, ADDR_OPERATING_MODE, 1, &dxl_error);
+    if (dxl_comm_result != COMM_SUCCESS) {
+      RCLCPP_ERROR(rclcpp::get_logger("read_write_node"), "Failed to set Velocity Control Mode.");
+    } else {
+      RCLCPP_INFO(rclcpp::get_logger("read_write_node"), "Succeeded to set Velocity Control Mode.");
+    }
+
+    dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, id, ADDR_TOURQUE_ENABLE, 1, &dxl_error);
+    if (dxl_comm_result != COMM_SUCCESS) {
+      RCLCPP_ERROR(rclcpp::get_logger("tourque"), "Failed to set tourque enable.");
+    } else {
+      RCLCPP_INFO(rclcpp::get_logger("tourque"), "Succeeded to set tourque enable.");
+    }
 
     Motor motor;
     motor.portHandler = portHandler;
@@ -64,11 +82,12 @@ Dynamixel::Dynamixel() : Node("dynamixel_h54") {
 
 void Dynamixel::handle_pub_data() {
   for (auto& [id, motor] : motors) {
-    int32_t pulse;
+    int32_t pulse = 0;
     motor.packetHandler->read4ByteTxRx(
         motor.portHandler, id, ADDR_PRESENT_POSITION, (uint32_t*)&pulse);
-    const float angle = (pulse / PULSE_PER_REV) * M_PI * 2;
-
+     
+    std_msgs::msg::Float32 angle;
+    angle.data = static_cast<float>((static_cast<double> (pulse)  /250961.5)* M_PI);
     motor.angle_pub->publish(angle);
   }
 }
@@ -81,7 +100,7 @@ void Motor::handle_command_angle(
 
 void Motor::handle_command_velocity(
     const std_msgs::msg::Float32::SharedPtr angle) {
-  packetHandler->write4ByteTxRx(
+  dxl_comm_result = packetHandler->write4ByteTxRx(
       portHandler, this->id, ADDR_GOAL_VELOCITY,
-      (int32_t)(angle->data / 0.104719755 / 0.00199234));
+      (int32_t)(angle->data / 0.104719755 / 0.00199234),&dxl_error);
 }

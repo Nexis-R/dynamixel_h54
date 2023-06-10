@@ -11,7 +11,11 @@ constexpr uint16_t ADDR_PRESENT_POSITION = 611;
 constexpr uint16_t ADDR_GOAL_POSITION = 596;
 constexpr uint16_t ADDR_GOAL_VELOCITY = 600;
 constexpr uint32_t PULSE_PER_REV = 501923;
+constexpr uint16_t ADDR_OPERATING_MODE = 11;
 
+uint8_t dxl_error = 0;
+
+int dxl_comm_result = COMM_TX_FAIL;
 struct Motor {
   uint16_t id;
   PortHandler* portHandler;
