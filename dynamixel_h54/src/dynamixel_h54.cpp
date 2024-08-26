@@ -69,7 +69,9 @@ void Dynamixel::handle_pub_data() {
         motor.portHandler, id, ADDR_PRESENT_POSITION, (uint32_t*)&pulse);
     const float angle = (pulse / PULSE_PER_REV) * M_PI * 2;
 
-    motor.angle_pub->publish(angle);
+    std_msgs::msg::Float32 msg;
+    msg.data = angle;
+    motor.angle_pub->publish(msg);
   }
 }
 
